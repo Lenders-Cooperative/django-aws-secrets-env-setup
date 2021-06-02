@@ -15,8 +15,11 @@ def __check_kwargs_then_environ__(kwarg_key, environ_key, **kwargs):
             raise
 
 def __get_secrets(default_region_name, **kwargs):
-    secrets_name = __check_kwargs_then_environ__('secrets_name', 'SECRETS_NAME', **kwargs)
-    region_name = os.environ.get("SECRETS_REGION_NAME", default_region_name)
+    secrets_name_env_name = kwargs.get('secrets_name_env_name', 'SECRETS_NAME')
+    secrets_name = __check_kwargs_then_environ__('secrets_name', secrets_name_env_name, **kwargs)
+
+    region_name_env_name = kwargs.get('region_name_env_name', 'SECRETS_REGION_NAME')
+    region_name = os.environ.get(region_name_env_name, default_region_name)
 
     session = boto3.session.Session()
     try:
@@ -28,9 +31,11 @@ def __get_secrets(default_region_name, **kwargs):
         # This uses a try/finally to make sure the key's existence is always checked regardless of the id's existence.
         # It's intended to ensure an error with the id doesn't cover an error with the key.
         try:
-            aws_access_key_id = __check_kwargs_then_environ__('aws_access_key_id', 'AWS_ACCESS_KEY_ID', **kwargs)
+            aws_access_key_id_env_name = kwargs.get('aws_access_key_id_env_name', 'AWS_ACCESS_KEY_ID')
+            aws_access_key_id = __check_kwargs_then_environ__('aws_access_key_id', aws_access_key_id_env_name, **kwargs)
         finally:
-            aws_secret_access_key = __check_kwargs_then_environ__('aws_secret_access_key', 'AWS_SECRET_ACCESS_KEY', **kwargs)
+            aws_secret_access_key_env_name = kwargs.get('aws_secret_access_key_env_name', 'AWS_SECRET_ACCESS_KEY')
+            aws_secret_access_key = __check_kwargs_then_environ__('aws_secret_access_key', aws_secret_access_key_env_name, **kwargs)
 
         try:
             client = session.client(

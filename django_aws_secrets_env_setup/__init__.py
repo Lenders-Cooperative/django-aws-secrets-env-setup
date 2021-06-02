@@ -14,8 +14,10 @@ def __check_kwargs_then_environ__(kwarg_key, environ_key, **kwargs):
             raise Exception(f'{kwarg_key} was not found in kwargs and {environ_key} was not found in environment variables')
 
 def __get_secrets(default_region_name, **kwargs):
-    secrets_name = __check_kwargs_then_environ__('secrets_name', 'SECRETS_NAME', **kwargs)
-    region_name = os.environ.get("SECRETS_REGION_NAME", default_region_name)
+    secrets_name_env_name = kwargs.get('secrets_name_env_name', 'SECRETS_NAME')
+    secrets_name = __check_kwargs_then_environ__('secrets_name', secrets_name_env_name, **kwargs)
+    region_name_env_name = kwargs.get('region_name_env_name', 'SECRETS_REGION_NAME')
+    region_name = os.environ.get(region_name_env_name, default_region_name)
     session = boto3.session.Session()
     try:
         client = session.client(
@@ -29,7 +31,8 @@ def __get_secrets(default_region_name, **kwargs):
             aws_access_key_id_env_name = kwargs.get('aws_access_key_id_env_name', 'AWS_ACCESS_KEY_ID')
             aws_access_key_id = __check_kwargs_then_environ__('aws_access_key_id', aws_access_key_id_env_name, **kwargs)
         finally:
-            aws_secret_access_key = __check_kwargs_then_environ__('aws_secret_access_key', 'AWS_SECRET_ACCESS_KEY', **kwargs)
+            aws_secret_access_key_env_name = kwargs.get('aws_secret_access_key_env_name', 'AWS_SECRET_ACCESS_KEY')
+            aws_secret_access_key = __check_kwargs_then_environ__('aws_secret_access_key', aws_secret_access_key_env_name, **kwargs)
         try:
             client = session.client(
                 service_name=kwargs.get('service_name', 'secretsmanager'),
@@ -52,7 +55,8 @@ def __get_secrets(default_region_name, **kwargs):
             raise Exception("You provided a parameter value that is not valid for the current state of the resource.")
         elif e.response['Error']['Code'] == 'ResourceNotFoundException':
             raise Exception("We can't find the resource that you asked for.")
-        raise Exception("There was an error getting the secret from the secret manager.")
+        else:
+            raise Exception("There was an error getting the secret from the secret manager.")
     except:
         raise Exception("There was an unknown error getting the secret from the secret manager.  This is likely due to an error with secrets_name, aws_access_key_id, or aws_secret_access_key.")
 

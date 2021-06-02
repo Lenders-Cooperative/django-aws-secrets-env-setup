@@ -1,0 +1,4 @@
+dist/*
+build/*
+django_aws_secrets_env_setup.egg-info/*
+.idea/*

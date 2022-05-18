@@ -70,7 +70,7 @@ def set_env_variables(default_region_name, stop_on_failure=False, **kwargs):
     try:
         secrets = __get_secrets(default_region_name, **kwargs)
         for k,v in secrets.items():
-            os.environ[k] = str(v)
+            os.environ[k] = str(v).strip()
     except Exception as e:
         if stop_on_failure:
             raise Exception(e)
